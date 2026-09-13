@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: ai-study-companion
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: NEXTAUTH_URL
+        value: https://ai-study-companion.onrender.com
+      - key: AUTH_TRUST_HOST
+        value: true
