@@ -1,0 +1,51 @@
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+dist/
+.pnp
+.pnp.js
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local data, storage, and uploads
+*.sqlite3
+*.db
+uploads/
+local_storage/
+backend/uploads/
+
+# Environment files & secrets (DO NOT COMMIT)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

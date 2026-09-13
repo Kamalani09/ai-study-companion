@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  passwordHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  spaces        Space[]
+  projects      Project[]
+  activities    Activity[]
+  aiLogs        AILog[]
+}
+
+model Space {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  projects    Project[]
+}
+
+model Project {
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  learningGoal String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  spaceId      String
+  space        Space     @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  materials      Material[]
+  chatSessions   ChatSession[]
+  quizzes        Quiz[]
+  conceptMasteries ConceptMastery[]
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  type      String   // e.g., "SPACE_CREATED", "PROJECT_CREATED"
+  details   String?  // JSON string or description
+  createdAt DateTime @default(now())
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Material {
+  id        String   @id @default(cuid())
+  title     String
+  fileName  String
+  fileUrl   String
+  status    String   // PENDING, PROCESSING, COMPLETED, ERROR
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ChatSession {
+  id        String    @id @default(cuid())
+  projectId String
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Message {
+  id            String      @id @default(cuid())
+  sessionId     String
+  session       ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role          String      // "user" or "model"
+  content       String
+  citations     String?     // JSON array of material/chunk references
+  createdAt     DateTime    @default(now())
+}
+
+model Quiz {
+  id        String         @id @default(cuid())
+  projectId String
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title     String
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+  createdAt DateTime       @default(now())
+}
+
+model QuizQuestion {
+  id          String   @id @default(cuid())
+  quizId      String
+  quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type        String   @default("MULTIPLE_CHOICE") // "MULTIPLE_CHOICE" or "OPEN_ENDED"
+  question    String
+  options     String   // JSON string array of options
+  answer      String   // The correct option
+  explanation String
+  concept     String   // The core concept being tested
+}
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  score     Int
+  total     Int
+  createdAt DateTime @default(now())
+}
+
+model ConceptMastery {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  concept       String
+  masteryLevel  Int      // 0 to 100
+  attemptsCount Int      @default(0)
+  updatedAt     DateTime @updatedAt
+  
+  @@unique([projectId, concept])
+}
+
+model AILog {
+  id           String   @id @default(cuid())
+  userId       String
+  action       String   // e.g., "GENERATE_QUIZ", "CHAT"
+  modelUsed    String
+  promptTokens Int?
+  compTokens   Int?
+  latencyMs    Int?
+  isSuccess    Boolean  @default(true)
+  errorMessage String?
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
